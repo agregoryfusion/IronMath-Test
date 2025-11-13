@@ -1,59 +1,194 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Fast Math</title>
-<style>
-  :root{
-    --bg:#0e0f12; --text:#ffffff; --muted:#a8b0bb; --accent:#1e90ff; --accent2:#00bfff; --panel:#161a20; --input:#15181d;
-  }
-  *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,"Helvetica Neue",Arial;text-align:center}
-  h1{margin:18px 0 6px;color:var(--accent)}
-  #version {  color: var(--accent);  font-size: 0.5em:  margin-top: -6px;}
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Fast Math</title>
 
-  /* LOGIN */
-  #login-screen{min-height:40vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}
-  #loginBtn{background:#0078d4;border:none;color:#fff;border-radius:8px;padding:12px 20px;font-size:16px;cursor:pointer}
-  #loginBtn:hover{background:#005ea6}
-  #loginStatus{color:#ff8a8a;font-size:13px}
+  <style>
+    :root{
+      --bg:#0e0f12; --text:#ffffff; --muted:#a8b0bb; --accent:#1e90ff; --accent2:#00bfff; --panel:#161a20; --input:#15181d;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--text);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,"Helvetica Neue",Arial;
+      text-align:center
+    }
+    h1{margin:18px 0 6px;color:var(--accent)}
+    #version {
+      color: var(--accent);
+      font-size: 0.75em;
+      margin-top: -6px;
+    }
 
-  /* GAME */
-  #game-container{display:none;max-width:900px;margin:0 auto;padding:10px 16px}
-  #question{font-size:48px;font-weight:700;margin-top:80px;margin-bottom:30px;min-height:1.2em;transition:transform .05s}
-  #timerBar{width:70%;height:30px;background:#20242b;border-radius:15px;margin:30px auto 30px;overflow:hidden;box-shadow:0 0 10px #1e90ff55}
-  #timerFill{height:100%;background:linear-gradient(90deg, var(--accent), var(--accent2));width:100%}
-  #answer{font-size:32px;padding:10px;border-radius:10px;border:2px solid var(--accent);width:140px;background:var(--input);color:#fff;text-align:center;outline:none;box-shadow:0 0 10px #1e90ff33;margin-bottom:16px}
-  #answer:focus{border-color:var(--accent2);box-shadow:0 0 15px #00bfff55}
-  #stage-info{margin-top:6px;font-size:18px;color:#c9d2db}
+    /* LOGIN */
+    #login-screen{
+      min-height:40vh;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:10px
+    }
+    #loginBtn{
+      background:#0078d4;
+      border:none;
+      color:#fff;
+      border-radius:8px;
+      padding:12px 20px;
+      font-size:16px;
+      cursor:pointer
+    }
+    #loginBtn:hover{background:#005ea6}
+    #loginStatus{color:#ff8a8a;font-size:13px}
 
-  /* END SCREEN */
-  #end-screen{display:none;text-align:center;margin-top:60px;color:#fff}
-  #end-screen h3{color:#ff4d4d;font-size:28px;margin:4px 0 10px}
-  #end-screen p{margin:6px 0;font-size:18px}
-  #end-screen button{background:var(--accent);border:none;color:#fff;padding:10px 20px;font-size:16px;border-radius:8px;margin:10px;cursor:pointer;transition:filter .2s}
-  #end-screen button:hover{filter:brightness(1.05)}
-  #session-id{color:#99a6b4;font-size:14px}
-  #saved-status{color:#7fdca2;font-size:14px}
+    /* GAME */
+    #game-container{
+      display:none;
+      max-width:900px;
+      margin:0 auto;
+      padding:10px 16px
+    }
+    #question{
+      font-size:48px;
+      font-weight:700;
+      margin-top:80px;
+      margin-bottom:30px;
+      min-height:1.2em;
+      transition:transform .05s
+    }
+    #timerBar{
+      width:70%;
+      height:30px;
+      background:#20242b;
+      border-radius:15px;
+      margin:30px auto 30px;
+      overflow:hidden;
+      box-shadow:0 0 10px #1e90ff55
+    }
+    #timerFill{
+      height:100%;
+      background:linear-gradient(90deg, var(--accent), var(--accent2));
+      width:100%
+    }
+    #answer{
+      font-size:32px;
+      padding:10px;
+      border-radius:10px;
+      border:2px solid var(--accent);
+      width:140px;
+      background:var(--input);
+      color:#fff;
+      text-align:center;
+      outline:none;
+      box-shadow:0 0 10px #1e90ff33;
+      margin-bottom:16px
+    }
+    #answer:focus{
+      border-color:var(--accent2);
+      box-shadow:0 0 15px #00bfff55
+    }
+    #stage-info{
+      margin-top:6px;
+      font-size:18px;
+      color:#c9d2db
+    }
 
-  /* LEADERBOARD */
-  #leaderboardContainer{display:none;margin:40px auto 20px;max-width:800px;text-align:center;opacity:0;transition:opacity .3s}
-  #leaderboardContainer.show{opacity:1}
-  #leaderboardStatus{color:#cfd6de;font-size:14px}
-  #leaderboardContainer table{width:100%;border-collapse:collapse;margin-top:12px}
-  #leaderboardContainer th,#leaderboardContainer td{padding:10px;border-bottom:1px solid #2a2f37;text-align:center}
-  #leaderboardContainer th{color:var(--accent);font-weight:600;border-bottom:2px solid #1e90ff33}
-  #leaderboardContainer td{color:#e6e9ee}
-  #leaderboardContainer tr:hover td{background:#1e90ff22}
-</style>
+    /* END SCREEN */
+    #end-screen{
+      display:none;
+      text-align:center;
+      margin-top:60px;
+      color:#fff
+    }
+    #end-screen h3{
+      color:#ff4d4d;
+      font-size:28px;
+      margin:4px 0 10px
+    }
+    #end-screen p{
+      margin:6px 0;
+      font-size:18px
+    }
+    #end-screen button{
+      background:var(--accent);
+      border:none;
+      color:#fff;
+      padding:10px 20px;
+      font-size:16px;
+      border-radius:8px;
+      margin:10px;
+      cursor:pointer;
+      transition:filter .2s
+    }
+    #end-screen button:hover{filter:brightness(1.05)}
+    #session-id{color:#99a6b4;font-size:14px}
+    #saved-status{color:#7fdca2;font-size:14px}
+
+    /* LEADERBOARD */
+    #leaderboardContainer{
+      display:none;
+      margin:40px auto 20px;
+      max-width:800px;
+      text-align:center;
+      opacity:0;
+      transition:opacity .3s
+    }
+    #leaderboardContainer.show{opacity:1}
+    #leaderboardStatus{color:#cfd6de;font-size:14px}
+    #leaderboardContainer table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:12px
+    }
+    #leaderboardContainer th,#leaderboardContainer td{
+      padding:10px;
+      border-bottom:1px solid #2a2f37;
+      text-align:center
+    }
+    #leaderboardContainer th{
+      color:var(--accent);
+      font-weight:600;
+      border-bottom:2px solid #1e90ff33
+    }
+    #leaderboardContainer td{color:#e6e9ee}
+    #leaderboardContainer tr:hover td{background:#1e90ff22}
+
+    #leaderboardButtons{
+      margin-top:10px;
+      display:flex;
+      justify-content:center;
+      gap:8px;
+    }
+    #leaderboardButtons button{
+      background:var(--accent);
+      border:none;
+      color:#fff;
+      padding:6px 14px;
+      border-radius:8px;
+      cursor:pointer;
+      font-size:14px;
+    }
+    #leaderboardButtons button:hover{
+      filter:brightness(1.05);
+    }
+  </style>
+
+  <!-- Supabase JS (v2) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
   <h1>Fusion Fast Math</h1>
-<p id="version">v1.0.25</p>
+  <p id="version">v1.0.26</p>
+
   <!-- Sign-In Screen -->
   <div id="login-screen">
-    <p class="note" style="color:#c9d2db">Please sign in with your Microsoft account to continue.</p>
+    <p class="note" style="color:#c9d2db">
+      Please sign in with your Microsoft account to continue.
+    </p>
     <button id="loginBtn">Sign in with Microsoft</button>
     <div id="loginStatus"></div>
   </div>
@@ -79,11 +214,12 @@
     <p id="saved-status"></p>
 
     <button id="restartBtn">Restart</button>
-<div id="leaderboardButtons">
-  <button id="viewAllBtn">Everyone</button>
-  <button id="viewStudentsBtn">Students</button>
-  <button id="viewTeachersBtn">Teachers</button>
-</div>
+
+    <div id="leaderboardButtons">
+      <button id="viewAllBtn">Everyone</button>
+      <button id="viewStudentsBtn">Students</button>
+      <button id="viewTeachersBtn">Teachers</button>
+    </div>
 
     <div id="leaderboardContainer">
       <p id="leaderboardStatus"></p>
@@ -98,57 +234,42 @@
     </div>
   </div>
 
-  <!-- Firebase + Auth + Game -->
+  <!-- Firebase Auth + Supabase Backend + Game -->
   <script type="module">
-const isFileMode = location.protocol === "file:";
-
-if (isFileMode) {
-  // Force local identity
-  window.playerName = "Alex Gregory";
-  window.isTeacher = true;
-  window.isStudent = false;
-
-  // Hide login screen immediately
-  document.getElementById("login-screen").style.display = "none";
-  document.getElementById("end-screen").style.display = "none";
-  document.getElementById("game-container").style.display = "block";
-
-  // Delay startGame until DOM/UI is ready
-  window.addEventListener("DOMContentLoaded", () => {
-    startGame();
-  });
-
-  // IMPORTANT: stop the rest of the script from running
-  // (skip Firebase entirely)
-  throw "LOCAL_FILE_MODE_BYPASS";
-}
-    /* ===================== Firebase SDKs ===================== */
+    /* ===================== Firebase SDKs (Auth only) ===================== */
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
     import {
       getAuth, OAuthProvider, signInWithPopup,
       setPersistence, browserLocalPersistence, onAuthStateChanged
     } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
-    import {
-      getFirestore, collection, doc, setDoc, addDoc,
-      getDocs, query, orderBy, limit
-    } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
-    /* ===================== Config (fill this in) ===================== */
-const firebaseConfig = {
-  apiKey: "AIzaSyBUaOrUckCuTrc9MHB9jCF4TUsx-hWFC7g",
-  authDomain: "ironmath-1263b.firebaseapp.com",
-  projectId: "ironmath-1263b",
-  storageBucket: "ironmath-1263b.firebasestorage.app",
-  messagingSenderId: "729878130193",
-  appId: "1:729878130193:web:f4d447b552e4f955f80bb0",
-  measurementId: "G-0VCM7C1HPC"
-};
-    /* ===================== Init ===================== */
+    /* ===================== Config ===================== */
+    const firebaseConfig = {
+      apiKey: "AIzaSyBUaOrUckCuTrc9MHB9jCF4TUsx-hWFC7g",
+      authDomain: "ironmath-1263b.firebaseapp.com",
+      projectId: "ironmath-1263b",
+      storageBucket: "ironmath-1263b.firebasestorage.app",
+      messagingSenderId: "729878130193",
+      appId: "1:729878130193:web:f4d447b552e4f955f80bb0",
+      measurementId: "G-0VCM7C1HPC"
+    };
+
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const db = getFirestore(app);
     const provider = new OAuthProvider("microsoft.com");
     await setPersistence(auth, browserLocalPersistence);
+
+    /* ===================== Supabase Config ===================== */
+    // TODO: fill these with your Supabase project values
+    const SUPABASE_URL = "https://jfjlznxvofhjjlommdrd.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_bSFpnR01TewY44SI8mLuLA_aX3bF3Lk";
+
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // Game version
+    const GAME_VERSION = "1.0.26";
+    const versionEl = document.getElementById("version");
+    if (versionEl) versionEl.textContent = "v" + GAME_VERSION;
 
     /* ===================== DOM ===================== */
     const loginScreen = document.getElementById("login-screen");
@@ -179,75 +300,62 @@ const firebaseConfig = {
     const cap = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
     let playerName = "Player";
 
-let isTeacher = false;
-let isStudent = false;
+    let isTeacher = false;
+    let isStudent = false;
 
-function setRoleFromEmail(email) {
-  const lower = (email || "").toLowerCase();
-  if (lower.endsWith("@fusionacademy.com")) {
-    isTeacher = true;
-    isStudent = false;
-  } else if (lower.endsWith("@fusionacademy.me")) {
-    isStudent = true;
-    isTeacher = false;
-  } else {
-    isTeacher = false;
-    isStudent = false;
-  }
-}
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        playerName = user.displayName || parseEmailToName(user.email);
 
-// -------- FILE MODE: bypass Firebase auth entirely --------
-if (isFileMode) {
-  // Default local identity
-  playerName = "Alex Gregory";
-  isTeacher = true;     // tweak if you want student instead
-  isStudent = false;
+        const email = user.email?.toLowerCase() || "";
+        if (email.endsWith("@fusionacademy.com")) {
+          isTeacher = true;
+          isStudent = false;
+        } else if (email.endsWith("@fusionacademy.me")) {
+          isStudent = true;
+          isTeacher = false;
+        } else {
+          isTeacher = false;
+          isStudent = false;
+        }
 
-  loginScreen.style.display = "none";
-  endScreen.style.display = "none";
-  gameContainer.style.display = "block";
-
-  startGame();
-} else {
-  // -------- NORMAL ONLINE MODE: use Firebase Microsoft login --------
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      playerName = user.displayName || parseEmailToName(user.email);
-      setRoleFromEmail(user.email);
-
-      loginScreen.style.display = "none";
-      endScreen.style.display = "none";
-      gameContainer.style.display = "block";
-      startGame();
-    } else {
-      gameContainer.style.display = "none";
-      endScreen.style.display = "none";
-      loginScreen.style.display = "flex";
-    }
-  });
-
-  loginBtn.addEventListener("click", async () => {
-    try {
-      const result = await signInWithPopup(auth, provider);
-      const u = result.user;
-      playerName = u.displayName || parseEmailToName(u.email);
-      setRoleFromEmail(u.email);
-
-      loginScreen.style.display = "none";
-      gameContainer.style.display = "block";
-      startGame();
-    } catch (e) {
-      console.error("Sign-in error:", e);
-      if (e?.code === "auth/unauthorized-domain") {
-        loginStatus.textContent =
-          "Sign-in failed: This domain is not authorized in Firebase. Add your GitHub Pages URL in Firebase Auth → Settings → Authorized domains.";
+        loginScreen.style.display = "none";
+        endScreen.style.display = "none";
+        gameContainer.style.display = "block";
+        startGame();
       } else {
+        gameContainer.style.display = "none";
+        endScreen.style.display = "none";
+        loginScreen.style.display = "flex";
+      }
+    });
+
+    loginBtn.addEventListener("click", async ()=>{
+      try{
+        const result = await signInWithPopup(auth, provider);
+        const u = result.user;
+        playerName = u.displayName || parseEmailToName(u.email);
+
+        const email = u.email?.toLowerCase() || "";
+        if (email.endsWith("@fusionacademy.com")) {
+          isTeacher = true;
+          isStudent = false;
+        } else if (email.endsWith("@fusionacademy.me")) {
+          isStudent = true;
+          isTeacher = false;
+        } else {
+          isTeacher = false;
+          isStudent = false;
+        }
+
+        loginScreen.style.display = "none";
+        gameContainer.style.display = "block";
+        startGame();
+      }catch(e){
+        console.error("Sign-in error:", e);
         loginStatus.textContent = "Sign-in failed: " + (e?.message || e);
       }
-    }
-  });
-}
-
+    });
 
     /* ===================== Game Settings ===================== */
     const SIGMA_SCALE = 6;       // normal distribution width across product range
@@ -262,32 +370,36 @@ if (isFileMode) {
     /* ===================== Game State ===================== */
     let sessionId = buildSessionID(playerName);
     let stage = START_STAGE;
-    let questionCount = 0;   // total asked (for stage growth)
+    let questionCount = 0;
     let correctCount = 0;
-    let totalTimeTrue = 0;   // sum of actual per-question solve times
-    let penaltySeconds = 0;  // sum of penalties
-    let productWeights = {}; // product -> weight
-    let recentAnswers = [];  // last N products for duplicate protection
-    let current = null;      // {a,b,prod}
+    let totalTimeTrue = 0;
+    let penaltySeconds = 0;
+    let productWeights = {};
+    let recentAnswers = [];
+    let current = null;
     let timeLeft = TIMER_SECONDS;
     let rafId = 0;
-    let qStartTs = 0;        // question start perf.now()
-    let runStartTs = 0;      // run start perf.now()
+    let qStartTs = 0;
+    let runStartTs = 0;
     let mistakesThisQuestion = 0;
     let loggedThisQuestion = false;
 
+    // runData holds per-question results for this session
+    let runData = { sessionID: "", results: [] };
+
     /* ===================== Helpers ===================== */
-    function shortID(len=6){
-      const chars='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-      let out=''; for(let i=0;i<len;i++) out += chars[Math.floor(Math.random()*chars.length)];
-      return out;
-    }
-    function randn(){ let u=0,v=0; while(u===0)u=Math.random(); while(v===0)v=Math.random();
+    function randn(){
+      let u=0,v=0;
+      while(u===0)u=Math.random();
+      while(v===0)v=Math.random();
       return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);
     }
     function sampleTrunc(minV,maxV,mu,sigma){
       if(sigma<=0||!isFinite(sigma)) return Math.min(Math.max(mu,minV),maxV);
-      for(let i=0;i<40;i++){ const x=mu+sigma*randn(); if(x>=minV && x<=maxV) return x; }
+      for(let i=0;i<40;i++){
+        const x=mu+sigma*randn();
+        if(x>=minV && x<=maxV) return x;
+      }
       return Math.min(Math.max(mu,minV),maxV);
     }
     function buildPairs(stage){
@@ -304,8 +416,12 @@ if (isFileMode) {
     function choosePair(pairs){
       let minP=Infinity,maxP=-Infinity;
       const prods=new Array(pairs.length);
-      for(let i=0;i<pairs.length;i++){ const p=pairs[i][0]*pairs[i][1]; prods[i]=p;
-        if(p<minP)minP=p; if(p>maxP)maxP=p; }
+      for(let i=0;i<pairs.length;i++){
+        const p=pairs[i][0]*pairs[i][1];
+        prods[i]=p;
+        if(p<minP)minP=p;
+        if(p>maxP)maxP=p;
+      }
       const mu=(minP+maxP)/2;
       const sigma=Math.max(1e-6,(maxP-minP)/SIGMA_SCALE);
       const target=sampleTrunc(minP,maxP,mu,sigma);
@@ -335,7 +451,7 @@ if (isFileMode) {
       productWeights[prod]=(productWeights[prod]||0)+1;
     }
     function shake(el, mult=1){
-      const urgency = 1 - (timeLeft/TIMER_SECONDS);         // more shake when time is low
+      const urgency = 1 - (timeLeft/TIMER_SECONDS);
       const dur = 0.3 + 0.2*urgency;
       const base = 8;
       const mag = base * (1 + 2*urgency) * (1 + 0.3*(mult-1));
@@ -355,47 +471,42 @@ if (isFileMode) {
       })();
     }
 
+    function buildSessionID(playerName) {
+      const parts = (playerName || "Player").trim().split(/\s+/);
+      const first = parts[0] || "Player";
+      const last = parts[1] || "";
+
+      // Get MST (UTC−7)
+      const now = new Date();
+      const utcMs = now.getTime() + now.getTimezoneOffset() * 60000;
+      const mst = new Date(utcMs - 7 * 60 * 60000);
+
+      const mm = String(mst.getMonth() + 1).padStart(2, "0");
+      const dd = String(mst.getDate()).padStart(2, "0");
+      const yyyy = mst.getFullYear();
+      const hh = String(mst.getHours()).padStart(2, "0");
+      const min = String(mst.getMinutes()).padStart(2, "0");
+
+      return `${first} ${last} ${mm}-${dd}-${yyyy} ${hh}:${min}`;
+    }
+
+    function resetRunState() {
+      sessionId = buildSessionID(playerName);
+      runData = { sessionID: sessionId, results: [] };
+      stage = START_STAGE;
+      questionCount = 0;
+      correctCount = 0;
+      totalTimeTrue = 0;
+      penaltySeconds = 0;
+      productWeights = {};
+      recentAnswers = [];
+      mistakesThisQuestion = 0;
+      loggedThisQuestion = false;
+      timeLeft = TIMER_SECONDS;
+      cancelAnimationFrame(rafId);
+    }
+
     /* ===================== Game Flow ===================== */
-let runData = { sessionID: "", results: [] };
-    
-function buildSessionID(playerName) {
-  const parts = (playerName || "Player").trim().split(/\s+/);
-  const first = parts[0] || "Player";
-  const last = parts[1] || "";
-
-  // Get MST (UTC−7)
-  const now = new Date();
-  const utcMs = now.getTime() + now.getTimezoneOffset() * 60000;
-  const mst = new Date(utcMs - 7 * 60 * 60000);
-
-  // Format safe date string (no slashes)
-  const mm = String(mst.getMonth() + 1).padStart(2, "0");
-  const dd = String(mst.getDate()).padStart(2, "0");
-  const yyyy = mst.getFullYear();
-  const hh = String(mst.getHours()).padStart(2, "0");
-  const min = String(mst.getMinutes()).padStart(2, "0");
-
-  // Use dashes instead of slashes
-  return `${first} ${last} ${mm}-${dd}-${yyyy} ${hh}:${min}`;
-}
-
-
-function resetRunState() {
-  sessionId = buildSessionID(playerName);
-  runData = { sessionID: sessionId, results: [] }; // add this line
-  stage = START_STAGE;
-  questionCount = 0;
-  correctCount = 0;
-  totalTimeTrue = 0;
-  penaltySeconds = 0;
-  productWeights = {};
-  recentAnswers = [];
-  mistakesThisQuestion = 0;
-  loggedThisQuestion = false;
-  timeLeft = TIMER_SECONDS;
-  cancelAnimationFrame(rafId);
-}
-
     function startGame(){
       resetRunState();
       runStartTs = performance.now();
@@ -403,7 +514,6 @@ function resetRunState() {
     }
 
     function nextQuestion(){
-      // decay and pick a new pair not in recent
       const pairs = buildPairs(stage);
       let q; let guard=0;
       do{
@@ -421,7 +531,6 @@ function resetRunState() {
       answerEl.focus();
       stageInfo.textContent = `Stage ${stage}`;
 
-      // timer start
       let penaltySecondsThisRound = 0;
       timeLeft = TIMER_SECONDS;
       qStartTs = performance.now();
@@ -437,25 +546,22 @@ function resetRunState() {
         timerFill.style.width = (pct * 100) + "%";
 
         if (timeLeft <= 0) {
-         // if (!loggedThisQuestion) {
-            const trueT = (performance.now() - qStartTs) / 1000;
-            totalTimeTrue += trueT;
+          const trueT = (performance.now() - qStartTs) / 1000;
+          totalTimeTrue += trueT;
           runData.results.push({
-  a: current.a,
-  b: current.b,
-  stage,
-  timeTaken: (performance.now() - qStartTs) / 1000,
-  mistakes: mistakesThisQuestion,
-  success: false
-});
-          //}
+            a: current.a,
+            b: current.b,
+            stage,
+            timeTaken: (performance.now() - qStartTs) / 1000,
+            mistakes: mistakesThisQuestion,
+            success: false
+          });
           return gameOver();
         }
         rafId = requestAnimationFrame(tick);
       };
       rafId = requestAnimationFrame(tick);
 
-      // attach a local handler that can see penaltySecondsThisRound
       answerEl.oninput = (e)=>{
         if(!current) return;
         const val = e.target.value.trim();
@@ -463,37 +569,32 @@ function resetRunState() {
         const correctStr = String(current.prod);
 
         if(val === correctStr){
-          // correct
           const trueT = (performance.now()-qStartTs)/1000;
           totalTimeTrue += trueT;
           correctCount++;
           questionCount++;
           runData.results.push({
-  a: current.a,
-  b: current.b,
-  stage,
-  timeTaken: (performance.now() - qStartTs) / 1000,
-  mistakes: mistakesThisQuestion,
-  success: true
-});
+            a: current.a,
+            b: current.b,
+            stage,
+            timeTaken: (performance.now() - qStartTs) / 1000,
+            mistakes: mistakesThisQuestion,
+            success: true
+          });
           decayWeightsAndBump(current.prod);
-          // Stage growth (quadratic-like)
           const stepSize = 2*stage - 1;
           if(questionCount >= stepSize*(stage-START_STAGE+1)) stage++;
           current = null;
           return nextQuestion();
         }
 
-        // wrong digit (not a prefix)
         if(!correctStr.startsWith(val)){
           const avgModifiedSoFar = (totalTimeTrue + penaltySeconds) / Math.max(correctCount, 1) || 2.0;
-          const penalty = avgModifiedSoFar * Math.pow(PENALTY_MULT, mistakesThisQuestion); // 1x,2x,4x...
+          const penalty = avgModifiedSoFar * Math.pow(PENALTY_MULT, mistakesThisQuestion);
           mistakesThisQuestion++;
-        //  runData.results.push({  a: current.a,  b: current.b,  stage,  timeTaken: (performance.now() - qStartTs) / 1000,  mistakes: mistakesThisQuestion,  success: false});
-          penaltySeconds += penalty;            // counted in modified totals
-          penaltySecondsThisRound += penalty;   // affects visible time-left this question
+          penaltySeconds += penalty;
+          penaltySecondsThisRound += penalty;
 
-          // visually jump bar and undo last digit
           const remaining = TIMER_SECONDS - ((performance.now() - qStartTs) / 1000) - penaltySecondsThisRound;
           timeLeft = Math.max(0, remaining);
           const pct = Math.max(0, Math.min(1, timeLeft / TIMER_SECONDS));
@@ -503,8 +604,16 @@ function resetRunState() {
           shake(questionEl, mistakesThisQuestion);
 
           if (remaining <= 0) {
-                      runData.results.push({  a: current.a,  b: current.b,  stage,  timeTaken: (performance.now() - qStartTs) / 1000,  mistakes: mistakesThisQuestion,  success: false});
-            return gameOver();}
+            runData.results.push({
+              a: current.a,
+              b: current.b,
+              stage,
+              timeTaken: (performance.now() - qStartTs) / 1000,
+              mistakes: mistakesThisQuestion,
+              success: false
+            });
+            return gameOver();
+          }
         }
       };
     }
@@ -515,227 +624,275 @@ function resetRunState() {
       gameContainer.style.display = "none";
       endScreen.style.display = "block";
 
-
-      // ✅ Show leaderboard immediately
       lbWrap.style.display = "block";
       lbWrap.classList.add("show");
       lbStatus.textContent = "Loading leaderboard...";
-      loadLeaderboard("all", true); // default to 'all' filter
+      loadLeaderboard("all", true); // default filter
 
       const totalTrue = totalTimeTrue;
       const totalWithPen = totalTimeTrue + penaltySeconds;
       const avgTrue = totalTrue / Math.max(correctCount,1);
       const avgPen = totalWithPen / Math.max(correctCount,1);
 
-     /* document.getElementById("end-stage").textContent = `Stage reached: ${stage}`;*/
       document.getElementById("end-questions").textContent = `Questions answered: ${correctCount}`;
       document.getElementById("end-penalty").textContent = `Total penalty time: ${penaltySeconds.toFixed(2)} s`;
       document.getElementById("end-total").innerHTML =
         `Total time: ${totalTrue.toFixed(2)} s (<span id="end-with-penalty">${totalWithPen.toFixed(2)}</span> s with penalties)`;
       document.getElementById("end-avg").innerHTML =
         `Avg time/question: ${avgTrue.toFixed(2)} s (<span id="end-avg-with-penalty">${avgPen.toFixed(2)}</span> s with penalties)`;
-     /* document.getElementById("session-id").textContent = `Session ID: ${sessionId}`; */
-  // If player ran out of time mid-question, log that as a failed entry
 
       uploadSession(totalTrue);
     }
 
-    // Restart (keep auth)
     restartBtn.addEventListener("click", ()=>{
       endScreen.style.display = "none";
       gameContainer.style.display = "block";
       startGame();
     });
 
-    /* ===================== Uploads + Leaderboard ===================== */
-async function uploadSession(totalTrue) {
-  try {
-const payload = {
-  sessionID: sessionId,
-  playerName,
-  stageReached: stage,
-  totalTime: totalTrue,
-  penaltyTime: penaltySeconds,
-  questionsAnswered: correctCount,
-  dateAdded: Date.now(),
-  isTeacher,
-  isStudent
-};
+    /* ===================== Supabase Uploads + Leaderboard ===================== */
 
-    const answersArray = runData.results.map(q => ({
-      a: q.a,
-      b: q.b,
-      stage: q.stage,
-      timeTaken: q.timeTaken,
-      mistakes: q.mistakes,
-      success: q.success,
-      dateAdded: Date.now()
-    }));
+    async function uploadSession(totalTrue) {
+      try {
+        const now = new Date();
+        const createdIso = now.toISOString();
+        const totalWithPen = totalTrue + penaltySeconds;
 
-    const sessionRef = doc(collection(db, "sessions"), sessionId);
-    await setDoc(sessionRef, { ...payload, answers: answersArray }, { merge: false });
+        // 1) Insert session, get numeric session_id
+        const { data: sessionRows, error: sessionError } = await supabase
+          .from("sessions")
+          .insert({
+            name: playerName,
+            questions_answered: correctCount,
+            true_time_seconds: totalTrue,
+            penalty_time_seconds: penaltySeconds,
+            total_time_seconds: totalWithPen,
+            stage_reached: stage,
+            created_at: createdIso,
+            version_number: GAME_VERSION
+          })
+          .select()
+          .single();
 
-    // Add leaderboard summary (unchanged)
-await addDoc(collection(db, "leaderboard"), payload);
+        if (sessionError) throw sessionError;
+        const sessionNumericId = sessionRows.session_id;
 
-// ✅ Update the local cache immediately
-updateCachedLeaderboardWithNewScore(payload);
+        // 2) Insert questions (answers array)
+        const questionsPayload = runData.results.map(q => ({
+          session_id: sessionNumericId,
+          a: q.a,
+          b: q.b,
+          time_taken: q.timeTaken,
+          mistakes: q.mistakes,
+          success: q.success,
+          date_added: createdIso,
+          player_name: playerName,
+          version_number: GAME_VERSION
+        }));
 
-document.getElementById("saved-status").textContent = "Saved ✓";
-  } catch (e) {
-    console.error("Upload failed", e);
-    const s = document.getElementById("saved-status");
-    s.textContent = "Upload failed";
-    s.style.color = "#ff8a8a";
-  }
-}
+        if (questionsPayload.length > 0) {
+          const { error: qError } = await supabase
+            .from("questions")
+            .insert(questionsPayload);
+          if (qError) {
+            console.error("Question insert error:", qError);
+          }
+        }
 
+        // 3) Insert leaderboard summary
+        const lbPayload = {
+          user_id: null,
+          session_id: sessionNumericId,
+          player_name: playerName,
+          stage_reached: stage,
+          questions_answered: correctCount,
+          total_time_seconds: totalWithPen,
+          penalty_time_seconds: penaltySeconds,
+          date_added: createdIso,
+          is_teacher: isTeacher,
+          is_student: isStudent
+        };
 
-function showLeaderboard(filteredData = null) {
-  const showing = lbWrap.classList.toggle("show");
-  lbWrap.style.display = showing ? "block" : "none";
-  if (showing) {
-    loadLeaderboard(filteredData);
-  }
-}
+        const { error: lbError } = await supabase
+          .from("leaderboard")
+          .insert(lbPayload);
+        if (lbError) throw lbError;
 
-viewAllBtn.addEventListener("click", () => renderLeaderboard(applyLeaderboardFilter(cachedLeaderboardData, "all")));
-viewStudentsBtn.addEventListener("click", () => renderLeaderboard(applyLeaderboardFilter(cachedLeaderboardData, "students")));
-viewTeachersBtn.addEventListener("click", () => renderLeaderboard(applyLeaderboardFilter(cachedLeaderboardData, "teachers")));
+        // 4) Update local cache in camelCase form
+        const cacheEntry = {
+          playerName,
+          stageReached: stage,
+          questionsAnswered: correctCount,
+          totalTime: totalWithPen,
+          penaltyTime: penaltySeconds,
+          dateAdded: now.getTime(),
+          isTeacher,
+          isStudent
+        };
 
-
-// Caching variables
-let cachedLeaderboardData = null;
-let lastLeaderboardFetchTime = 0;
-const LEADERBOARD_CACHE_DURATION = 60000; // 60 seconds
-function updateCachedLeaderboardWithNewScore(newEntry) {
-  if (!newEntry?.playerName) return;
-
-  const key = (newEntry.playerName || "").trim().toLowerCase();
-  if (!cachedLeaderboardData) cachedLeaderboardData = [];
-
-  // Check if this player already exists in cache
-  const existingIndex = cachedLeaderboardData.findIndex(
-    d => (d.playerName || "").trim().toLowerCase() === key
-  );
-
-  if (existingIndex !== -1) {
-    const old = cachedLeaderboardData[existingIndex];
-
-    // Replace only if the new one is better
-    const isBetter =
-      newEntry.questionsAnswered > (old.questionsAnswered ?? 0) ||
-      (newEntry.questionsAnswered === old.questionsAnswered &&
-        newEntry.totalTime < (old.totalTime ?? Infinity));
-
-    if (isBetter) {
-      cachedLeaderboardData[existingIndex] = newEntry;
-    }
-  } else {
-    // First time this player has ever appeared
-    cachedLeaderboardData.push(newEntry);
-  }
-
-  // Sort the cache again by leaderboard rules
-  cachedLeaderboardData.sort((a, b) => {
-    if (b.questionsAnswered === a.questionsAnswered)
-      return a.totalTime - b.totalTime;
-    return b.questionsAnswered - a.questionsAnswered;
-  });
-
-  // Re-render immediately using whatever filter is active
-  const activeFilter =
-    document.querySelector("#leaderboardButtons button.active")?.id || "allBtn";
-  const filterType =
-    activeFilter.includes("student")
-      ? "students"
-      : activeFilter.includes("teacher")
-      ? "teachers"
-      : "all";
-
-  renderLeaderboard(applyLeaderboardFilter(cachedLeaderboardData, filterType));
-}
-
-async function loadLeaderboard(filterType = "all", forceRefresh = false) {
-  try {
-    const now = Date.now();
-    if (!forceRefresh && cachedLeaderboardData && (now - lastLeaderboardFetchTime < LEADERBOARD_CACHE_DURATION)) {
-      console.log("Using cached leaderboard data");
-      renderLeaderboard(applyLeaderboardFilter(cachedLeaderboardData, filterType));
-      return;
+        updateCachedLeaderboardWithNewScore(cacheEntry);
+        document.getElementById("saved-status").textContent = "Saved ✓";
+      } catch (e) {
+        console.error("Upload failed", e);
+        const s = document.getElementById("saved-status");
+        s.textContent = "Upload failed";
+        s.style.color = "#ff8a8a";
+      }
     }
 
-    lbStatus.textContent = "Loading leaderboard...";
-    const qy = query(
-      collection(db, "leaderboard"),
-      orderBy("questionsAnswered", "desc"),
-      orderBy("totalTime", "asc"),
-      limit(500)
+    function showLeaderboard(filteredType = "all") {
+      const showing = lbWrap.classList.toggle("show");
+      lbWrap.style.display = showing ? "block" : "none";
+      if (showing) {
+        loadLeaderboard(filteredType);
+      }
+    }
+
+    viewAllBtn.addEventListener("click", () =>
+      renderLeaderboard(applyLeaderboardFilter(cachedLeaderboardData || [], "all"))
     );
-    const snap = await getDocs(qy);
+    viewStudentsBtn.addEventListener("click", () =>
+      renderLeaderboard(applyLeaderboardFilter(cachedLeaderboardData || [], "students"))
+    );
+    viewTeachersBtn.addEventListener("click", () =>
+      renderLeaderboard(applyLeaderboardFilter(cachedLeaderboardData || [], "teachers"))
+    );
 
-    const grouped = {};
-    snap.forEach(docSnap => {
-      const d = docSnap.data();
-      if (!d.playerName) return;
-      const key = (d.playerName || "").trim().toLowerCase();
-      if (!grouped[key]) grouped[key] = [];
-      grouped[key].push(d);
-    });
+    // Caching variables
+    let cachedLeaderboardData = null;
+    let lastLeaderboardFetchTime = 0;
+    const LEADERBOARD_CACHE_DURATION = 60000; // 60 seconds
 
-    const best = Object.values(grouped).map(list =>
-      list.sort((a, b) => {
+    function updateCachedLeaderboardWithNewScore(newEntry) {
+      if (!newEntry?.playerName) return;
+
+      const key = (newEntry.playerName || "").trim().toLowerCase();
+      if (!cachedLeaderboardData) cachedLeaderboardData = [];
+
+      const existingIndex = cachedLeaderboardData.findIndex(
+        d => (d.playerName || "").trim().toLowerCase() === key
+      );
+
+      if (existingIndex !== -1) {
+        const old = cachedLeaderboardData[existingIndex];
+        const isBetter =
+          newEntry.questionsAnswered > (old.questionsAnswered ?? 0) ||
+          (newEntry.questionsAnswered === old.questionsAnswered &&
+            newEntry.totalTime < (old.totalTime ?? Infinity));
+
+        if (isBetter) {
+          cachedLeaderboardData[existingIndex] = newEntry;
+        }
+      } else {
+        cachedLeaderboardData.push(newEntry);
+      }
+
+      cachedLeaderboardData.sort((a, b) => {
         if (b.questionsAnswered === a.questionsAnswered)
           return a.totalTime - b.totalTime;
         return b.questionsAnswered - a.questionsAnswered;
-      })[0]
-    );
+      });
 
-    best.sort((a, b) => {
-      if (b.questionsAnswered === a.questionsAnswered)
-        return a.totalTime - b.totalTime;
-      return b.questionsAnswered - a.questionsAnswered;
-    });
+      // Default re-render with "all" filter
+      renderLeaderboard(applyLeaderboardFilter(cachedLeaderboardData, "all"));
+    }
 
-    cachedLeaderboardData = best;
-    lastLeaderboardFetchTime = now;
+    async function loadLeaderboard(filterType = "all", forceRefresh = false) {
+      try {
+        const now = Date.now();
+        if (!forceRefresh && cachedLeaderboardData && (now - lastLeaderboardFetchTime < LEADERBOARD_CACHE_DURATION)) {
+          console.log("Using cached leaderboard data");
+          renderLeaderboard(applyLeaderboardFilter(cachedLeaderboardData, filterType));
+          return;
+        }
 
-    renderLeaderboard(applyLeaderboardFilter(best, filterType));
-    lbStatus.textContent = "";
-  } catch (e) {
-    console.error(e);
-    lbStatus.textContent = "Failed to load leaderboard: " + (e?.message || e);
-  }
-}
-function applyLeaderboardFilter(data, filterType) {
-  if (filterType === "students") {
-    return data.filter(d => d.isStudent === true);
-  } else if (filterType === "teachers") {
-    return data.filter(d => d.isTeacher === true);
-  }
-  return data;
-}
+        lbStatus.textContent = "Loading leaderboard...";
 
-function renderLeaderboard(data) {
-  lbBody.innerHTML = "";
-  let rank = 1;
-  for (const d of data.slice(0, 100)) {
-    const date = d.dateAdded ? new Date(d.dateAdded) : null;
-    const mm = date ? String(date.getMonth() + 1).padStart(2, "0") : "--";
-    const dd = date ? String(date.getDate()).padStart(2, "0") : "--";
-    const yyyy = date ? date.getFullYear() : "----";
+        const { data, error } = await supabase
+          .from("leaderboard")
+          .select("*")
+          .order("questions_answered", { ascending: false })
+          .order("total_time_seconds", { ascending: true })
+          .limit(500);
 
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${rank++}</td>
-      <td>${escapeHtml(d.playerName || "???")}</td>
-      <td>${d.questionsAnswered ?? "?"}</td>
-      <td>${(d.totalTime ?? 0).toFixed(2)}</td>
-      <td>${mm}/${dd}/${yyyy}</td>
-    `;
-    lbBody.appendChild(tr);
-  }
-}
+        if (error) throw error;
+
+        const rows = data || [];
+        // Normalize to the camelCase shape used by the rest of the code
+        const normalized = rows
+          .filter(r => !!r.player_name)
+          .map(r => ({
+            playerName: r.player_name,
+            questionsAnswered: r.questions_answered ?? 0,
+            totalTime: r.total_time_seconds ?? 0,
+            penaltyTime: r.penalty_time_seconds ?? 0,
+            dateAdded: r.date_added ? new Date(r.date_added).getTime() : null,
+            isTeacher: r.is_teacher ?? false,
+            isStudent: r.is_student ?? false,
+            stageReached: r.stage_reached ?? null
+          }));
+
+        const grouped = {};
+        for (const d of normalized) {
+          const key = (d.playerName || "").trim().toLowerCase();
+          if (!grouped[key]) grouped[key] = [];
+          grouped[key].push(d);
+        }
+
+        const best = Object.values(grouped).map(list =>
+          list.sort((a, b) => {
+            if (b.questionsAnswered === a.questionsAnswered)
+              return a.totalTime - b.totalTime;
+            return b.questionsAnswered - a.questionsAnswered;
+          })[0]
+        );
+
+        best.sort((a, b) => {
+          if (b.questionsAnswered === a.questionsAnswered)
+            return a.totalTime - b.totalTime;
+          return b.questionsAnswered - a.questionsAnswered;
+        });
+
+        cachedLeaderboardData = best;
+        lastLeaderboardFetchTime = now;
+
+        renderLeaderboard(applyLeaderboardFilter(best, filterType));
+        lbStatus.textContent = "";
+      } catch (e) {
+        console.error(e);
+        lbStatus.textContent = "Failed to load leaderboard: " + (e?.message || e);
+      }
+    }
+
+    function applyLeaderboardFilter(data, filterType) {
+      if (filterType === "students") {
+        return data.filter(d => d.isStudent === true);
+      } else if (filterType === "teachers") {
+        return data.filter(d => d.isTeacher === true);
+      }
+      return data;
+    }
+
+    function renderLeaderboard(data) {
+      lbBody.innerHTML = "";
+      let rank = 1;
+      for (const d of data.slice(0, 100)) {
+        const date = d.dateAdded ? new Date(d.dateAdded) : null;
+        const mm = date ? String(date.getMonth() + 1).padStart(2, "0") : "--";
+        const dd = date ? String(date.getDate()).padStart(2, "0") : "--";
+        const yyyy = date ? date.getFullYear() : "----";
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${rank++}</td>
+          <td>${escapeHtml(d.playerName || "???")}</td>
+          <td>${d.questionsAnswered ?? "?"}</td>
+          <td>${(d.totalTime ?? 0).toFixed(2)}</td>
+          <td>${mm}/${dd}/${yyyy}</td>
+        `;
+        lbBody.appendChild(tr);
+      }
+    }
 
     function escapeHtml(s){
       return String(s).replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
