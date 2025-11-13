@@ -182,7 +182,7 @@
 </head>
 <body>
   <h1>Fusion Fast Math</h1>
-  <p id="version">v1.0.26</p>
+  <p id="version">v1.0.27</p>
 
   <!-- Sign-In Screen -->
   <div id="login-screen">
@@ -236,6 +236,56 @@
 
   <!-- Firebase Auth + Supabase Backend + Game -->
   <script type="module">
+
+    
+    /* ===================== Supabase Config ===================== */
+    // TODO: fill these with your Supabase project values
+    const SUPABASE_URL = "https://jfjlznxvofhjjlommdrd.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_bSFpnR01TewY44SI8mLuLA_aX3bF3Lk";
+
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+async function recordUserLogin(email, name) {
+  const nowIso = new Date().toISOString();
+
+  // 1. Upsert into users table
+  const { data: userRows, error: userErr } = await supabase
+    .from("users")
+    .upsert(
+      {
+        email: email,
+        name: name,
+        last_login_at: nowIso,
+        // created_at will be auto-set on first insert if you set a default
+      },
+      { onConflict: "email" }
+    )
+    .select()
+    .single();
+
+  if (userErr) {
+    console.error("User upsert failed:", userErr);
+  }
+
+  const userId = userRows?.user_id ?? null;
+
+  // 2. Insert into logins table
+  if (userId !== null) {
+    const { error: loginErr } = await supabase
+      .from("logins")
+      .insert({
+        user_id: userId,
+        name: name,
+        login_at: nowIso
+      });
+
+    if (loginErr) {
+      console.error("Login insert failed:", loginErr);
+    }
+  }
+
+  return userId;
+}
+    
     /* ===================== Firebase SDKs (Auth only) ===================== */
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
     import {
@@ -259,15 +309,8 @@
     const provider = new OAuthProvider("microsoft.com");
     await setPersistence(auth, browserLocalPersistence);
 
-    /* ===================== Supabase Config ===================== */
-    // TODO: fill these with your Supabase project values
-    const SUPABASE_URL = "https://jfjlznxvofhjjlommdrd.supabase.co";
-    const SUPABASE_ANON_KEY = "sb_publishable_bSFpnR01TewY44SI8mLuLA_aX3bF3Lk";
-
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
     // Game version
-    const GAME_VERSION = "1.0.26";
+    const GAME_VERSION = "1.0.27";
     const versionEl = document.getElementById("version");
     if (versionEl) versionEl.textContent = "v" + GAME_VERSION;
 
@@ -319,6 +362,9 @@
           isStudent = false;
         }
 
+    // ⬇️ ADD THIS ⬇️
+    const userId = await recordUserLogin(email, playerName);
+    window.currentUserId = userId;
         loginScreen.style.display = "none";
         endScreen.style.display = "none";
         gameContainer.style.display = "block";
@@ -347,7 +393,9 @@
           isTeacher = false;
           isStudent = false;
         }
-
+    // ⬇️ ADD THIS ⬇️
+    const userId = await recordUserLogin(email, playerName);
+    window.currentUserId = userId;
         loginScreen.style.display = "none";
         gameContainer.style.display = "block";
         startGame();
