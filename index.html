@@ -182,7 +182,7 @@
 </head>
 <body>
   <h1>Fusion Fast Math</h1>
-  <p id="version">v1.0.28</p>
+  <p id="version">v1.0.29</p>
 
   <!-- Sign-In Screen -->
   <div id="login-screen">
@@ -247,34 +247,69 @@
 async function recordUserLogin(email, name) {
   const nowIso = new Date().toISOString();
 
-  // 1. Upsert into users table
-  const { data: userRows, error: userErr } = await supabase
+  // 1. First check if a user with this name already exists
+  const { data: existingUser, error: findErr } = await supabase
     .from("users")
-    .upsert(
-      {
-        email: email,
-        name: name,
-        last_login_at: nowIso,
-        // created_at will be auto-set on first insert if you set a default
-      },
-      { onConflict: "email" }
-    )
-    .select()
-    .single();
+    .select("*")
+    .eq("name", name)
+    .maybeSingle();
 
-  if (userErr) {
-    console.error("User upsert failed:", userErr);
+  if (findErr) {
+    console.error("User lookup error:", findErr);
   }
 
-  const userId = userRows?.user_id ?? null;
+  let userId = null;
 
-  // 2. Insert into logins table
+  if (existingUser) {
+    // ----------------------------------------
+    // Existing user found — update if needed
+    // ----------------------------------------
+
+    userId = existingUser.user_id;
+
+    const updatedEmail = existingUser.email || email;  
+    // only overwrite email if it was NULL
+
+    const { error: updateErr } = await supabase
+      .from("users")
+      .update({
+        email: updatedEmail,
+        last_login_at: nowIso
+      })
+      .eq("user_id", userId);
+
+    if (updateErr) {
+      console.error("User update failed:", updateErr);
+    }
+  } else {
+    // ----------------------------------------
+    // No user row existed — create new
+    // ----------------------------------------
+
+    const { data: inserted, error: insertErr } = await supabase
+      .from("users")
+      .insert({
+        name,
+        email,
+        last_login_at: nowIso
+      })
+      .select()
+      .single();
+
+    if (insertErr) {
+      console.error("User insert failed:", insertErr);
+    } else {
+      userId = inserted.user_id;
+    }
+  }
+
+  // 2. Always add a record to the logins table
   if (userId !== null) {
     const { error: loginErr } = await supabase
       .from("logins")
       .insert({
         user_id: userId,
-        name: name,
+        name,
         login_at: nowIso
       });
 
@@ -285,6 +320,7 @@ async function recordUserLogin(email, name) {
 
   return userId;
 }
+
     
     /* ===================== Firebase SDKs (Auth only) ===================== */
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
@@ -310,7 +346,7 @@ async function recordUserLogin(email, name) {
     await setPersistence(auth, browserLocalPersistence);
 
     // Game version
-    const GAME_VERSION = "1.0.28";
+    const GAME_VERSION = "1.0.29";
     const versionEl = document.getElementById("version");
     if (versionEl) versionEl.textContent = "v" + GAME_VERSION;
 
