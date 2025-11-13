@@ -346,35 +346,37 @@ async function recordUserLogin(email, name) {
     let isTeacher = false;
     let isStudent = false;
 
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        playerName = user.displayName || parseEmailToName(user.email);
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    playerName = user.displayName || parseEmailToName(user.email);
 
-        const email = user.email?.toLowerCase() || "";
-        if (email.endsWith("@fusionacademy.com")) {
-          isTeacher = true;
-          isStudent = false;
-        } else if (email.endsWith("@fusionacademy.me")) {
-          isStudent = true;
-          isTeacher = false;
-        } else {
-          isTeacher = false;
-          isStudent = false;
-        }
+    const email = user.email?.toLowerCase() || "";
 
-    // ⬇️ ADD THIS ⬇️
+    if (email.endsWith("@fusionacademy.com")) {
+      isTeacher = true;
+      isStudent = false;
+    } else if (email.endsWith("@fusionacademy.me")) {
+      isStudent = true;
+      isTeacher = false;
+    } else {
+      isTeacher = false;
+      isStudent = false;
+    }
+
+    // Record login in Supabase and stash user_id
     const userId = await recordUserLogin(email, playerName);
     window.currentUserId = userId;
-        loginScreen.style.display = "none";
-        endScreen.style.display = "none";
-        gameContainer.style.display = "block";
-        startGame();
-      } else {
-        gameContainer.style.display = "none";
-        endScreen.style.display = "none";
-        loginScreen.style.display = "flex";
-      }
-    });
+
+    loginScreen.style.display = "none";
+    endScreen.style.display = "none";
+    gameContainer.style.display = "block";
+    startGame();
+  } else {
+    gameContainer.style.display = "none";
+    endScreen.style.display = "none";
+    loginScreen.style.display = "flex";
+  }
+});
 
     loginBtn.addEventListener("click", async ()=>{
       try{
