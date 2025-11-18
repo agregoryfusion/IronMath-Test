@@ -182,7 +182,7 @@
 </head>
 <body>
   <h1>Fusion Fast Math</h1>
-  <p id="version">v1.0.30</p>
+  <p id="version"></p>
 
   <!-- Sign-In Screen -->
   <div id="login-screen">
@@ -237,6 +237,8 @@
   <!-- Firebase Auth + Supabase Backend + Game -->
   <script type="module">
 
+  // Game version
+  const GAME_VERSION = "1.0.31";
     async function upsertLeaderboardEntry({
   playerName,
   questionsAnswered,
@@ -416,10 +418,10 @@
     const provider = new OAuthProvider("microsoft.com");
     await setPersistence(auth, browserLocalPersistence);
 
-    // Game version
-    const GAME_VERSION = "1.0.30";
-    const versionEl = document.getElementById("version");
-    if (versionEl) versionEl.textContent = "v" + GAME_VERSION;
+    const versionElement = document.getElementById("version");
+    if (versionElement) {
+      versionElement.textContent = `v${GAME_VERSION}`;
+    }
 
     /* ===================== DOM ===================== */
     const loginScreen = document.getElementById("login-screen");
@@ -856,20 +858,9 @@ onAuthStateChanged(auth, async (user) => {
           }
         }
 
-        // 3) Insert leaderboard summary
-        const lbPayload = {
-          user_id: null,
-          session_id: sessionNumericId,
-          player_name: playerName,
-          stage_reached: stage,
-          questions_answered: correctCount,
-          total_time_seconds: totalWithPen,
-          penalty_time_seconds: penaltySeconds,
-          date_added: createdIso,
-          is_teacher: isTeacher,
-          is_student: isStudent
-        };
 
+
+// 3) Upsert leaderboard summary (best score only)
 await upsertLeaderboardEntry({
   playerName,
   questionsAnswered: correctCount,
@@ -881,22 +872,21 @@ await upsertLeaderboardEntry({
   versionNumber: GAME_VERSION
 });
 
-        if (lbError) throw lbError;
+// 4) Update local cache in camelCase form
+const cacheEntry = {
+  playerName,
+  stageReached: stage,
+  questionsAnswered: correctCount,
+  totalTime: totalWithPen,
+  penaltyTime: penaltySeconds,
+  dateAdded: now.getTime(),
+  isTeacher,
+  isStudent
+};
 
-        // 4) Update local cache in camelCase form
-        const cacheEntry = {
-          playerName,
-          stageReached: stage,
-          questionsAnswered: correctCount,
-          totalTime: totalWithPen,
-          penaltyTime: penaltySeconds,
-          dateAdded: now.getTime(),
-          isTeacher,
-          isStudent
-        };
+updateCachedLeaderboardWithNewScore(cacheEntry);
+document.getElementById("saved-status").textContent = "Saved ✓";
 
-        updateCachedLeaderboardWithNewScore(cacheEntry);
-        document.getElementById("saved-status").textContent = "Saved ✓";
       } catch (e) {
         console.error("Upload failed", e);
         const s = document.getElementById("saved-status");
