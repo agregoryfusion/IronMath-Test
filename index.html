@@ -238,7 +238,7 @@
   <script type="module">
 
   // Game version
-  const GAME_VERSION = "1.0.31";
+  const GAME_VERSION = "1.0.32";
     async function upsertLeaderboardEntry({
   playerName,
   questionsAnswered,
@@ -818,20 +818,22 @@ onAuthStateChanged(auth, async (user) => {
         const totalWithPen = totalTrue + penaltySeconds;
 
         // 1) Insert session, get numeric session_id
-        const { data: sessionRows, error: sessionError } = await supabase
-          .from("sessions")
-          .insert({
-            name: playerName,
-            questions_answered: correctCount,
-            true_time_seconds: totalTrue,
-            penalty_time_seconds: penaltySeconds,
-            total_time_seconds: totalWithPen,
-            stage_reached: stage,
-            created_at: createdIso,
-            version_number: GAME_VERSION
-          })
-          .select()
-          .single();
+const { data: sessionRows, error: sessionError } = await supabase
+  .from("sessions")
+  .insert({
+    user_id: window.currentUserId || null,
+    name: playerName,
+    questions_answered: correctCount,
+    true_time_seconds: totalTrue,
+    penalty_time_seconds: penaltySeconds,
+    total_time_seconds: totalWithPen,
+    stage_reached: stage,
+    created_at: createdIso,
+    version_number: GAME_VERSION
+  })
+  .select()
+  .single();
+
 
         if (sessionError) throw sessionError;
         const sessionNumericId = sessionRows.session_id;
