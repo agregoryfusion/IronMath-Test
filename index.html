@@ -182,7 +182,7 @@
 </head>
 <body>
   <h1>Fusion Fast Math</h1>
-  <p id="version">v1.0.29</p>
+  <p id="version">v1.0.30</p>
 
   <!-- Sign-In Screen -->
   <div id="login-screen">
@@ -237,15 +237,86 @@
   <!-- Firebase Auth + Supabase Backend + Game -->
   <script type="module">
 
-    
+    async function upsertLeaderboardEntry({
+  playerName,
+  questionsAnswered,
+  totalTime,
+  penaltyTime,
+  stageReached,
+  isTeacher,
+  isStudent,
+  versionNumber
+}) {
+  const nowIso = new Date().toISOString();
+
+  // 1. Get existing leaderboard entry for this player
+  const { data: existing, error: fetchErr } = await supabase
+    .from("leaderboard")
+    .select("*")
+    .eq("player_name", playerName)
+    .maybeSingle();
+
+  if (fetchErr) {
+    console.error("Leaderboard fetch error:", fetchErr);
+    return;
+  }
+
+  // 2. If none exists → INSERT directly
+  if (!existing) {
+    const { error: insertErr } = await supabase
+      .from("leaderboard")
+      .insert({
+        player_name: playerName,
+        stage_reached: stageReached,
+        questions_answered: questionsAnswered,
+        total_time_seconds: totalTime,
+        penalty_time_seconds: penaltyTime,
+        date_added: nowIso,
+        is_teacher: isTeacher,
+        is_student: isStudent,
+        version_number: versionNumber
+      });
+
+    if (insertErr) console.error("Leaderboard insert failed:", insertErr);
+    return;
+  }
+
+  // 3. Compare performance vs. existing row
+  const betterQuestions = questionsAnswered > existing.questions_answered;
+  const sameQuestions = questionsAnswered === existing.questions_answered;
+  const fasterTime = totalTime < existing.total_time_seconds;
+
+  const shouldUpdate = betterQuestions || (sameQuestions && fasterTime);
+
+  if (!shouldUpdate) {
+    console.log("Leaderboard: new score is NOT better, skipping update.");
+    return;
+  }
+
+  // 4. Update existing row
+  const { error: updateErr } = await supabase
+    .from("leaderboard")
+    .update({
+      stage_reached: stageReached,
+      questions_answered: questionsAnswered,
+      total_time_seconds: totalTime,
+      penalty_time_seconds: penaltyTime,
+      date_added: nowIso,
+      version_number: versionNumber
+    })
+    .eq("leaderboard_id", existing.leaderboard_id);
+
+  if (updateErr) console.error("Leaderboard update failed:", updateErr);
+}
+
     /* ===================== Supabase Config ===================== */
     // TODO: fill these with your Supabase project values
     const SUPABASE_URL = "https://jfjlznxvofhjjlommdrd.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_bSFpnR01TewY44SI8mLuLA_aX3bF3Lk";
 
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-async function recordUserLogin(email, name) {
-  const nowIso = new Date().toISOString();
+    async function recordUserLogin(email, name) {
+    const nowIso = new Date().toISOString();
 
   // 1. First check if a user with this name already exists
   const { data: existingUser, error: findErr } = await supabase
@@ -346,7 +417,7 @@ async function recordUserLogin(email, name) {
     await setPersistence(auth, browserLocalPersistence);
 
     // Game version
-    const GAME_VERSION = "1.0.29";
+    const GAME_VERSION = "1.0.30";
     const versionEl = document.getElementById("version");
     if (versionEl) versionEl.textContent = "v" + GAME_VERSION;
 
@@ -799,9 +870,17 @@ onAuthStateChanged(auth, async (user) => {
           is_student: isStudent
         };
 
-        const { error: lbError } = await supabase
-          .from("leaderboard")
-          .insert(lbPayload);
+await upsertLeaderboardEntry({
+  playerName,
+  questionsAnswered: correctCount,
+  totalTime: totalWithPen,
+  penaltyTime: penaltySeconds,
+  stageReached: stage,
+  isTeacher,
+  isStudent,
+  versionNumber: GAME_VERSION
+});
+
         if (lbError) throw lbError;
 
         // 4) Update local cache in camelCase form
